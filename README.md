@@ -3,7 +3,7 @@
 
 **How to set up this project?**
 **1. Download "Arduino IDE**
-- "https://www.arduino.cc/en/software/ and install.
+- https://www.arduino.cc/en/software/
 ---
 **2. Add your ESP32 board**
 - Arduino IDE → Tools → Board → Board Manager... search: "esp32", author: "Espressif Systems".
