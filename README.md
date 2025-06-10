@@ -1,5 +1,5 @@
 # ESP32-wifi-operator
-This project uses the telegram bot to contact with ESP32 to manage network.
+>This project uses the telegram bot to contact with ESP32 to manage network.
 
 How to set up this project?
 1. Download "Arduino IDE" from this side: https://www.arduino.cc/en/software/ and install.
@@ -37,11 +37,11 @@ https://api.telegram.org/botyour_token/getUpdates
 
 3. Now refresh the page with the getUpdates link.
 
-🔍 4. Find chat_id
+✅ 4. Find chat_id
 
 In response you will see something like this (in JSON format):
 
-{
+```{
   "ok": true,
   "result": [
     {
@@ -62,5 +62,5 @@ In response you will see something like this (in JSON format):
     }
   ]
 }
-
+```
 👉 This chat.id field (here: <chatid>) is your chat_id.
