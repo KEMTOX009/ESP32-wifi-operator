@@ -5,9 +5,11 @@ How to set up this project?
 1. Download "Arduino IDE" from this side: https://www.arduino.cc/en/software/ and install.
 ---
 2. Add your ESP32 board
+
 Arduino IDE → Tools → Board → Board Manager... search: "esp32", author: "Espressif Systems".
 ---
 3. Install necessary libraries
+
 Arduino IDE → Tools → Manage Libraries… → Search: "UniversalTelegramBot" (author: Brian Lough), "ArduinoJson" (author: Benoit Blanchon) → Install.
 ---
 4. Create a bot on Telegram
