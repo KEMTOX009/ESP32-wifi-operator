@@ -24,9 +24,9 @@ Arduino IDE → Tools → Board → Board Manager... search: "esp32", author: "E
 
 ✅ 2. Open a browser and type the address:
 
-https://api.telegram.org/bot<your_token>/getUpdates
+https://api.telegram.org/botyour_token/getUpdates
 
-🔁 Replace <your_token> with the one you got from BotFather.
+🔁 Replace your_token with the one you got from BotFather.
 
 ---
 
