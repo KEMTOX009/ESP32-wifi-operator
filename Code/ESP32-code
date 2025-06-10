@@ -1,0 +1,161 @@
+#include <WiFi.h>
+#include <WiFiMulti.h>
+#include <WiFiClientSecure.h>
+#include <UniversalTelegramBot.h>
+#include <time.h>
+
+// Dane do Telegrama
+#define BOT_TOKEN "your_telegram_bot_token"
+#define CHAT_ID "<your_chatID_on_telegram"
+
+WiFiMulti wifiMulti;
+WiFiClientSecure secured_client;
+UniversalTelegramBot bot(BOT_TOKEN, secured_client);
+
+const int ledPin = 2;
+unsigned long lastTimeBotRan;
+
+void sendStartupMessage() {
+  String message = "🔌 ESP32 uruchomione!\n";
+  message += "📶 Sieć: " + WiFi.SSID() + "\n";
+  message += "🌐 IP: " + WiFi.localIP().toString() + "\n";
+  message += "📡 RSSI: " + String(WiFi.RSSI()) + " dBm\n";
+  bot.sendMessage(CHAT_ID, message, "");
+}
+
+String getUptime() {
+  long seconds = millis() / 1000;
+  int days = seconds / 86400;
+  seconds %= 86400;
+  int hours = seconds / 3600;
+  seconds %= 3600;
+  int minutes = seconds / 60;
+  seconds %= 60;
+  return String(days) + "d " + hours + "h " + minutes + "m " + seconds + "s";
+}
+
+void setupTime() {
+  configTime(3600, 3600, "pool.ntp.org", "time.nist.gov");
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) {
+    Serial.println("❌ Nie udało się pobrać czasu z NTP");
+  } else {
+    Serial.println("⏰ Czas ustawiony z NTP");
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, LOW);
+
+  secured_client.setInsecure();
+
+  wifiMulti.addAP("wifi1", "passwordforwifi1");
+  wifiMulti.addAP("wifi2", "passwordforwifi2");
+  wifiMulti.addAP("wifi3", "passwordforwifi3");
+  wifiMulti.addAP("wifi4", "passwordforwifi4");
+  wifiMulti.addAP("wifi5", "passwordforwifi5");
+  wifiMulti.addAP("wifi6", "passwordforwifi6");
+
+  Serial.println("Łączenie z WiFi...");
+  while (wifiMulti.run() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\n✅ Połączono z WiFi!");
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+
+  setupTime();
+  sendStartupMessage();
+  lastTimeBotRan = millis();
+}
+
+void loop() {
+  if (millis() - lastTimeBotRan > 1000) {
+    int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
+
+    while (numNewMessages) {
+      for (int i = 0; i < numNewMessages; i++) {
+        String text = bot.messages[i].text;
+        String from = bot.messages[i].from_name;
+
+        Serial.print("Komenda od ");
+        Serial.print(from);
+        Serial.print(": ");
+        Serial.println(text);
+
+        if (text == "/zapal") {
+          digitalWrite(ledPin, HIGH);
+          bot.sendMessage(CHAT_ID, "💡 Dioda włączona!", "");
+        } else if (text == "/zgas") {
+          digitalWrite(ledPin, LOW);
+          bot.sendMessage(CHAT_ID, "💡 Dioda wyłączona!", "");
+        } else if (text == "/status") {
+          bool state = digitalRead(ledPin);
+          bot.sendMessage(CHAT_ID, state ? "🔆 Dioda JEST WŁĄCZONA" : "🔅 Dioda jest wyłączona", "");
+        } else if (text == "/uptime") {
+          bot.sendMessage(CHAT_ID, "⏱️ Czas działania: " + getUptime(), "");
+        } else if (text == "/disconnect") {
+          WiFi.disconnect();
+          bot.sendMessage(CHAT_ID, "📴 Rozłączono z Wi-Fi", "");
+        } else if (text == "/rebootwifi") {
+          WiFi.disconnect();
+          delay(1000);
+          WiFi.reconnect();
+          bot.sendMessage(CHAT_ID, "♻️ Restart połączenia Wi-Fi", "");
+        } else if (text == "/listaps") {
+          String msg = "📡 Zapisane sieci:\n";
+          for (int i = 0; i < wifiMulti.run(); i++) {
+            msg += "- " + String(i + 1) + "\n";
+          }
+          bot.sendMessage(CHAT_ID, msg, "");
+        } else if (text == "/mac") {
+          bot.sendMessage(CHAT_ID, "🔍 MAC: " + WiFi.macAddress(), "");
+        //} else if (text == "/restart") {
+          //bot.sendMessage(CHAT_ID, "🔁 Restart ESP32...", "");
+          //delay(1000);
+          //ESP.restart();
+        } else if (text == "/czas") {
+          struct tm timeinfo;
+          if (getLocalTime(&timeinfo)) {
+            char buffer[64];
+            strftime(buffer, sizeof(buffer), "⏰ Czas: %d.%m.%Y %H:%M:%S", &timeinfo);
+            bot.sendMessage(CHAT_ID, buffer, "");
+          } else {
+            bot.sendMessage(CHAT_ID, "❌ Błąd pobierania czasu", "");
+          }
+        } else if (text == "/wifiinfo") {
+          String info = "📶 Sieć: " + WiFi.SSID() + "\n";
+          info += "🌐 IP: " + WiFi.localIP().toString() + "\n";
+          info += "📡 RSSI: " + String(WiFi.RSSI()) + " dBm\n";
+          bot.sendMessage(CHAT_ID, info, "");
+        } else if (text == "/help") {
+          String helpMessage = "📖 Dostępne komendy:\n";
+          helpMessage += "/zapal - Włącz diodę LED\n";
+          helpMessage += "/zgas - Wyłącz diodę LED\n";
+          helpMessage += "/status - Stan diody LED\n";
+          helpMessage += "/czas - Aktualny czas (NTP)\n";
+          helpMessage += "/uptime - Czas działania ESP32\n";
+          helpMessage += "/disconnect - Rozłącz z Wi-Fi\n";
+          helpMessage += "/rebootwifi - Połącz ponownie z Wi-Fi\n";
+          helpMessage += "/listaps - Lista zapisanych sieci\n";
+          helpMessage += "/mac - Pokaż adres MAC\n";
+          helpMessage += "/restart - Zrestartuj ESP32\n";
+          helpMessage += "/wifiinfo - Szczegóły połączenia Wi-Fi\n";
+          helpMessage += "/help - Wyświetl tę pomoc";
+          bot.sendMessage(CHAT_ID, helpMessage, "");
+        } else {
+          bot.sendMessage(CHAT_ID, "❓ Nieznana komenda. Wpisz /help", "");
+        }
+      }
+
+      numNewMessages = bot.getUpdates(bot.last_message_received + 1);
+    }
+
+    lastTimeBotRan = millis();
+  }
+}
+
