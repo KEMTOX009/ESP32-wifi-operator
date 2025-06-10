@@ -63,7 +63,7 @@ In response you will see something like this (in JSON format):
         },
         "chat": {
           "id": 987654321,
-          "first_name": "TwojeImię",
+          "first_name": "Yourname",
           "type": "private"
         },
         "text": "test"
