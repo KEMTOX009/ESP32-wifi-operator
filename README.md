@@ -18,11 +18,7 @@ Arduino IDE → Tools → Board → Board Manager... search: "esp32", author: "E
 
 4. Provide a name and username (must end with bot)
 
-5. You will receive a bot token in the format:
-
-123456789:AAH1z6lSXYZabcDEFghiJKLmnoPQrstUVwx
-
-> Write down this token - you will need it in the next step.
+5. You will receive a bot token > Write down this token - you will need it in the next step.
 
 ---
 
@@ -30,9 +26,7 @@ Arduino IDE → Tools → Board → Board Manager... search: "esp32", author: "E
 
 https://api.telegram.org/bot<your_token>/getUpdates
 
-🔁 Replace <your_token> with the one you got from BotFather.  Example:
-
-https://api.telegram.org/bot123456789:AAH1z6lSXYZabcDEFghiJKLmnoPQrstUVwx/getUpdates
+🔁 Replace <your_token> with the one you got from BotFather.
 
 ---
 
@@ -54,15 +48,15 @@ In response you will see something like this (in JSON format):
   "ok": true,
   "result": [
     {
-      "update_id": 123456789,
+      "update_id": <id>,
       "message": {
         "message_id": 1,
         "from": {
-          "id": 987654321,
+          "id": <chatid>,
           ...
         },
         "chat": {
-          "id": 987654321,
+          "id": <chatid>,
           "first_name": "Yourname",
           "type": "private"
         },
@@ -72,4 +66,4 @@ In response you will see something like this (in JSON format):
   ]
 }
 
-👉 This chat.id field (here: 987654321) is your chat_id.
+👉 This chat.id field (here: <chatid>) is your chat_id.
